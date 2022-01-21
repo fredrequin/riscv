@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Core
 //                            V1.0.1
@@ -132,7 +133,9 @@ module riscv_pipe_ctrl
 //-------------------------------------------------------------
 // Includes
 //-------------------------------------------------------------
+`ifdef _VLINT_
 `include "riscv_defs.v"
+`endif
 
 wire squash_e1_e2_w;
 wire branch_misaligned_w = (issue_branch_taken_i && issue_branch_target_i[1:0] != 2'b0);
@@ -456,7 +459,7 @@ assign csr_write_wb_o  = csr_wr_wb_q;
 assign csr_waddr_wb_o  = opcode_wb_q[31:20];
 assign csr_wdata_wb_o  = csr_wdata_wb_q;
 
-`ifdef verilator
+`ifdef _RISCV_TRACE_SIM_
 riscv_trace_sim
 u_trace_d
 (

@@ -41,6 +41,10 @@
 //--------------------------------------------------------------------
 // ALU Operations
 //--------------------------------------------------------------------
+`ifdef _RISCV_DEFS_
+/* Already included */
+`else
+
 `define ALU_NONE                                4'b0000
 `define ALU_SHIFTL                              4'b0001
 `define ALU_SHIFTR                              4'b0010
@@ -536,3 +540,6 @@
 `define RISCV_REGNO_CSR0    13'd65
 `define RISCV_REGNO_CSR4095 (`RISCV_REGNO_CSR0 +  13'd4095)
 `define RISCV_REGNO_PRIV    13'd4161
+
+`endif /* _RISCV_DEFS_ */
+

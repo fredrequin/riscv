@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Core
 //                            V1.0.1
@@ -153,7 +154,9 @@ module riscv_issue
 
 
 
+`ifdef _VLINT_
 `include "riscv_defs.v"
+`endif
 
 wire enable_muldiv_w     = SUPPORT_MULDIV;
 wire enable_mul_bypass_w = SUPPORT_MUL_BYPASS;
@@ -532,11 +535,10 @@ assign csr_opcode_ra_operand_o  = opcode_ra_operand_o;
 assign csr_opcode_rb_operand_o  = opcode_rb_operand_o;
 assign csr_opcode_invalid_o     = opcode_issue_r && issue_invalid_w;
 
-
 //-------------------------------------------------------------
 // Checker Interface
 //-------------------------------------------------------------
-`ifdef verilator
+`ifdef _RISCV_TRACE_SIM_
 riscv_trace_sim
 u_pipe_dec0_verif
 (

@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Top
 //                            V0.6
@@ -110,7 +111,7 @@ module dport_mux
 wire hold_w;
 
 /* verilator lint_off UNSIGNED */
-wire tcm_access_w = (mem_addr_i >= TCM_MEM_BASE && mem_addr_i < (TCM_MEM_BASE + 32'd65536));
+wire tcm_access_w = (mem_addr_i[31:17] == TCM_MEM_BASE[31:17]) ? 1'b1 : 1'b0;
 /* verilator lint_on UNSIGNED */
 
 reg       tcm_access_q;

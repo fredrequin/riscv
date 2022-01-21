@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Core
 //                            V1.0.1
@@ -38,7 +39,9 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
 // SUCH DAMAGE.
 //-----------------------------------------------------------------
+`ifdef _VLINT_
 `include "riscv_defs.v"
+`endif
 
 module riscv_trace_sim
 (

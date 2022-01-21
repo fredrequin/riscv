@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Top
 //                            V0.6
@@ -43,6 +44,9 @@
 //                          Generated File
 //-----------------------------------------------------------------
 module tcm_mem
+#(
+    parameter MEM_INIT_FILE = "NONE"
+)
 (
     // Inputs
      input           clk_i
@@ -165,18 +169,21 @@ u_conv
 //-------------------------------------------------------------
 
 // Mux access to the 2nd port between external access and CPU data access
-wire [13:0] muxed_addr_w = ext_accept_w ? ext_addr_w[15:2] : mem_d_addr_i[15:2];
+wire [16:2] muxed_addr_w = ext_accept_w ? ext_addr_w[16:2] : mem_d_addr_i[16:2];
 wire [31:0] muxed_data_w = ext_accept_w ? ext_write_data_w : mem_d_data_wr_i;
 wire [3:0]  muxed_wr_w   = ext_accept_w ? ext_wr_w         : mem_d_wr_i;
 wire [31:0] data_r_w;
 
 tcm_mem_ram
+#(
+    .MEM_INIT_FILE (MEM_INIT_FILE)
+)
 u_ram
 (
     // Instruction fetch
      .clk0_i(clk_i)
     ,.rst0_i(rst_i)
-    ,.addr0_i(mem_i_pc_i[15:2])
+    ,.addr0_i(mem_i_pc_i[16:2])
     ,.data0_i(32'b0)
     ,.wr0_i(4'b0)
 
@@ -258,38 +265,81 @@ assign mem_d_accept_o       = mem_d_accept_q;
 assign ext_accept_w         = !mem_d_accept_q;
 assign ext_ack_w            = ext_ack_q;
 
+
 `ifdef verilator
 //-------------------------------------------------------------
-// write: Write byte into memory
+// mem_write_b(): Write byte into memory
 //-------------------------------------------------------------
-function write; /*verilator public*/
+function mem_write_b; /*verilator public*/
     input [31:0] addr;
-    input [7:0]  data;
+    input [ 7:0] data;
 begin
     case (addr[1:0])
-    2'd0: u_ram.ram[addr/4][7:0]   = data;
-    2'd1: u_ram.ram[addr/4][15:8]  = data;
-    2'd2: u_ram.ram[addr/4][23:16] = data;
-    2'd3: u_ram.ram[addr/4][31:24] = data;
+        2'b00: u_ram.ram[addr[16:2]][ 7: 0] = data;
+        2'b01: u_ram.ram[addr[16:2]][15: 8] = data;
+        2'b10: u_ram.ram[addr[16:2]][23:16] = data;
+        2'b11: u_ram.ram[addr[16:2]][31:24] = data;
     endcase
 end
 endfunction
 //-------------------------------------------------------------
-// read: Read byte from memory
+// mem_write_w(): Write word into memory
 //-------------------------------------------------------------
-function [7:0] read; /*verilator public*/
+function mem_write_w; /*verilator public*/
+    input [31:0] addr;
+    input [15:0] data;
+begin
+    if (addr[1])
+        u_ram.ram[addr[16:2]][31:16] = data;
+    else
+        u_ram.ram[addr[16:2]][15: 0] = data;
+end
+endfunction
+//-------------------------------------------------------------
+// mem_write_l(): Write long into memory
+//-------------------------------------------------------------
+function mem_write_l; /*verilator public*/
+    input [31:0] addr;
+    input [31:0] data;
+begin
+    u_ram.ram[addr[16:2]] = data;
+end
+endfunction
+//-------------------------------------------------------------
+// mem_read_b(): Read byte from memory
+//-------------------------------------------------------------
+function [7:0] mem_read_b; /*verilator public*/
     input [31:0] addr;
 begin
     case (addr[1:0])
-    2'd0: read = u_ram.ram[addr/4][7:0];
-    2'd1: read = u_ram.ram[addr/4][15:8];
-    2'd2: read = u_ram.ram[addr/4][23:16];
-    2'd3: read = u_ram.ram[addr/4][31:24];
+        2'b00: mem_read_b = u_ram.ram[addr[16:2]][ 7: 0];
+        2'b01: mem_read_b = u_ram.ram[addr[16:2]][15: 8];
+        2'b10: mem_read_b = u_ram.ram[addr[16:2]][23:16];
+        2'b11: mem_read_b = u_ram.ram[addr[16:2]][31:24];
     endcase
+end
+endfunction
+//-------------------------------------------------------------
+// mem_read_w(): Read word from memory
+//-------------------------------------------------------------
+function [15:0] mem_read_w; /*verilator public*/
+    input [31:0] addr;
+begin
+    if (addr[1])
+        mem_read_w = u_ram.ram[addr[16:2]][31:16];
+    else
+        mem_read_w = u_ram.ram[addr[16:2]][15: 0];
+end
+endfunction
+//-------------------------------------------------------------
+// mem_read_l(): Read long from memory
+//-------------------------------------------------------------
+function [31:0] mem_read_l; /*verilator public*/
+    input [31:0] addr;
+begin
+    mem_read_l = u_ram.ram[addr[16:2]];
 end
 endfunction
 `endif
-
-
 
 endmodule

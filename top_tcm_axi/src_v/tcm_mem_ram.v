@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 //-----------------------------------------------------------------
 //                         RISC-V Top
 //                            V0.6
@@ -43,16 +44,19 @@
 //                          Generated File
 //-----------------------------------------------------------------
 module tcm_mem_ram
+#(
+    parameter MEM_INIT_FILE = "NONE"
+)
 (
     // Inputs
      input           clk0_i
     ,input           rst0_i
-    ,input  [ 13:0]  addr0_i
+    ,input  [ 14:0]  addr0_i
     ,input  [ 31:0]  data0_i
     ,input  [  3:0]  wr0_i
     ,input           clk1_i
     ,input           rst1_i
-    ,input  [ 13:0]  addr1_i
+    ,input  [ 14:0]  addr1_i
     ,input  [ 31:0]  data1_i
     ,input  [  3:0]  wr1_i
 
@@ -62,14 +66,26 @@ module tcm_mem_ram
 );
 
 
-
 //-----------------------------------------------------------------
-// Dual Port RAM 64KB
+// Dual Port RAM 128KB
 // Mode: Read First
 //-----------------------------------------------------------------
 /* verilator lint_off MULTIDRIVEN */
-reg [31:0]   ram [16383:0] /*verilator public*/;
+reg [31:0]   ram [0:32767] /*verilator public*/;
 /* verilator lint_on MULTIDRIVEN */
+
+initial begin : MEM_INIT
+    int i;
+    
+    if (MEM_INIT_FILE == "NONE") begin
+        for (i = 0; i < 32768; i = i + 1) begin
+            ram[i] = 0;
+        end
+    end
+    else begin
+        $readmemh(MEM_INIT_FILE, ram);
+    end
+end
 
 reg [31:0] ram_read0_q;
 reg [31:0] ram_read1_q;
