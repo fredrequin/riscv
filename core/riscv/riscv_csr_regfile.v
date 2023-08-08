@@ -1,4 +1,7 @@
+`ifdef verilator3
+`else
 `timescale 1 ns / 1 ps
+`endif
 //-----------------------------------------------------------------
 //                         RISC-V Core
 //                            V1.0.1
