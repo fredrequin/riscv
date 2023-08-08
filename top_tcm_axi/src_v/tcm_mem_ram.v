@@ -77,12 +77,22 @@ module tcm_mem_ram
 reg [31:0]   ram [0:32767] /*verilator public*/;
 /* verilator lint_on MULTIDRIVEN */
 
+import "DPI-C" function string get_tcm_file_name();
+
+string  _file_name;
+
 initial begin : MEM_INIT
     int i;
     
     if (MEM_INIT_FILE == "NONE") begin
-        for (i = 0; i < 32768; i = i + 1) begin
-            ram[i] = 0;
+        _file_name = get_tcm_file_name();
+        if (_file_name == "NONE") begin
+            for (i = 0; i < 32768; i = i + 1) begin
+                ram[i] = 0;
+            end
+        end
+        else begin
+            $readmemh(_file_name, ram);
         end
     end
     else begin
